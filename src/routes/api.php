@@ -11,10 +11,15 @@ Route::post('/logout', [LoginController::class, 'logout']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::post('/user', function (Request $request) {
-        return $request->user();
+        return response()->json([
+            'message' => 'Logged in',
+            'user' => $request->user(),
+        ], 200);
     });
 
     Route::get('/test', function () {
-        return 'test';
+        return response()->json([
+            'message' => 'Authenticated',
+        ], 200);
     });
 });

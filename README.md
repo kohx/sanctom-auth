@@ -182,7 +182,6 @@ rm database/migrations/2019_12_14_000001_create_personal_access_tokens_table.php
 
 * SPAからの受信リクエストがLaravelのセッションクッキーを使用して認証できるようになる
 * サードパーティまたはモバイルアプリケーションからのリクエストがAPIトークンを使用して認証できるようにする役割を果たす
-* セッションを使うのでセッションミドルウェアも追加
 
  `app\Http\Kernel.php`
 
@@ -193,7 +192,6 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
     'api' => [
         \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, // 追記
         'throttle:api',
-        \Illuminate\Session\Middleware\StartSession::class, // 追記
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
     ],
     //...
@@ -272,16 +270,25 @@ php artisan make:controller Auth/LoginController
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CookieAuthenticationController;
+use App\Http\Controllers\Auth\LoginController;
 
-Route::post('/login', [Controller::class, 'login']);
-Route::post('/logout', [CookieAuthenticationController::class, 'logout']);
-Route::post('/user', [CookieAuthenticationController::class, 'user']);
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout']);
 
-// テスト用のルート
+
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::get('/test', function() {
-        return 'test';
+
+    Route::post('/user', function (Request $request) {
+        return response()->json([
+            'message' => 'Logged in',
+            'user' => $request->user(),
+        ], 200);
+    });
+
+    Route::get('/test', function () {
+        return response()->json([
+            'message' => 'Authenticated',
+        ], 200);
     });
 });
 ```
@@ -336,7 +343,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 
@@ -354,7 +360,7 @@ final class LoginController extends Controller
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return Json
      * @throws Exception
      */
     public function login(Request $request)
@@ -373,16 +379,18 @@ final class LoginController extends Controller
         // check login
         if ($this->attemptLogin($request)) {
 
+            // success login response
             return $this->sendSuccessLoginResponse($request);
         }
 
+        // failed login response
         $this->incrementLoginAttempts($request);
         return $this->sendFailedLoginResponse($request);
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return Json
      */
     public function logout(Request $request)
     {
@@ -390,7 +398,7 @@ final class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return new JsonResponse(['message' => 'ログアウトしました']);
+        return response()->json(['message' => 'Logged out'], 200);
     }
 
     /**
@@ -464,13 +472,17 @@ final class LoginController extends Controller
      * ログイン成功のレスポンス
      *
      * @param  Request $request
-     * @return JsonResponse
+     * @return Json
      */
     private function sendSuccessLoginResponse(Request $request)
     {
         $request->session()->regenerate();
         $this->clearLoginAttempts($request);
-        return $request->user();
+
+        return response()->json([
+            'message' => 'Logged in',
+            'user' => $request->user(),
+        ], 200);
     }
 
     /**
@@ -584,6 +596,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 import Home from '@/pages/front/Home.vue'
+import Test from '@/pages/front/Test.vue'
 import Login from '@/pages/front/Login.vue'
 
 // VueRouterをVueで使う
@@ -599,6 +612,15 @@ const routes = [
         path: '/',
         // インポートしたページ
         component: Home,
+    },
+    // Test
+    {
+        // ルートネーム
+        name: 'test',
+        // urlのパス
+        path: '/test',
+        // インポートしたページ
+        component: Test,
     },
     // Login
     {
@@ -629,6 +651,7 @@ export default router
   <div class="container">
     <h1>Home</h1>
     <router-link :to="{ name: 'login'}">Login</router-link>
+    <router-link :to="{ name: 'test'}">Test</router-link>
   </div>
 </template>
 ```
@@ -639,7 +662,8 @@ export default router
 <template>
   <div class="container">
     <h1>Login</h1>
-
+    <router-link :to="{ name: 'home'}">Home</router-link>
+    <router-link :to="{ name: 'test'}">Test</router-link>
     <form @submit.prevent="login">
       <input type="email" name="email" v-model="loginForm.email" />
       <input type="password" name="password" v-model="loginForm.password" />
@@ -663,7 +687,7 @@ export default {
         email: null,
       },
       loginForm: {
-        email: "demo1@example.com",
+        email: "user1@example.com",
         password: "password",
         remember: true,
       },
@@ -677,9 +701,10 @@ export default {
       // login
       const { data, status } = await axios.post("login", this.loginForm);
       if (status === 200) {
-        this.user.id = data.id;
-        this.user.name = data.name;
-        this.user.email = data.email;
+        this.user.id = data.user.id;
+        this.user.name = data.user.name;
+        this.user.email = data.user.email;
+        alert(data.message);
       }
     },
     async logout() {
@@ -689,6 +714,7 @@ export default {
         this.user.id = null;
         this.user.name = null;
         this.user.email = null;
+        alert(data.message);
       }
     },
   },
@@ -696,13 +722,44 @@ export default {
     // get user
     const { data, status } = await axios.post("/user");
     if (status === 200) {
-      this.user.id = data.id;
-      this.user.name = data.name;
-      this.user.email = data.email;
+      this.user.id = data.user.id;
+      this.user.name = data.user.name;
+      this.user.email = data.user.email;
     } else {
       this.user.id = null;
       this.user.name = null;
       this.user.email = null;
+    }
+  },
+};
+</script>
+```
+
+#### resources\js\pages\front\Test.vue
+
+```vue
+<template>
+  <div class="container">
+    <h1>Test</h1>
+    <div>{{message}}</div>
+    <router-link :to="{ name: 'home'}">Home</router-link>
+    <router-link :to="{ name: 'login'}">Login</router-link>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "Home",
+  data() {
+    return {
+      message: 'Unauthorized'
+    };
+  },
+  async created() {
+    // get user
+    const { data, status } = await axios.get("/test");
+    if (status === 200) {
+      this.message = data.message;
     }
   },
 };

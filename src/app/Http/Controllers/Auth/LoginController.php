@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 
@@ -23,7 +22,7 @@ final class LoginController extends Controller
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return Json
      * @throws Exception
      */
     public function login(Request $request)
@@ -42,16 +41,18 @@ final class LoginController extends Controller
         // check login
         if ($this->attemptLogin($request)) {
 
+            // success login response
             return $this->sendSuccessLoginResponse($request);
         }
 
+        // failed login response
         $this->incrementLoginAttempts($request);
         return $this->sendFailedLoginResponse($request);
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return Json
      */
     public function logout(Request $request)
     {
@@ -59,7 +60,7 @@ final class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return new JsonResponse(['message' => 'ログアウトしました']);
+        return response()->json(['message' => 'Logged out'], 200);
     }
 
     /**
@@ -133,13 +134,17 @@ final class LoginController extends Controller
      * ログイン成功のレスポンス
      *
      * @param  Request $request
-     * @return JsonResponse
+     * @return Json
      */
     private function sendSuccessLoginResponse(Request $request)
     {
         $request->session()->regenerate();
         $this->clearLoginAttempts($request);
-        return $request->user();
+
+        return response()->json([
+            'message' => 'Logged in',
+            'user' => $request->user(),
+        ], 200);
     }
 
     /**
