@@ -1,0 +1,5 @@
+/db/*
+/minio/*
+/redis/*
+!/db/my.conf
+/https-portal
