@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 import Home from '@/pages/front/Home.vue'
 import Test from '@/pages/front/Test.vue'
 import Login from '@/pages/front/Login.vue'
+import Register from '@/pages/front/Register.vue'
 
 // VueRouterをVueで使う
 Vue.use(VueRouter)
@@ -33,9 +34,18 @@ const routes = [
         // ルートネーム
         name: 'login',
         // urlのパス
-        path: '/Login',
+        path: '/login',
         // インポートしたページ
         component: Login,
+    },
+    // Register
+    {
+        // ルートネーム
+        name: 'register',
+        // urlのパス
+        path: '/register',
+        // インポートしたページ
+        component: Register,
     }
 ]
 

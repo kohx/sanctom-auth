@@ -3,6 +3,7 @@
     <h1>Login</h1>
     <router-link :to="{ name: 'home'}">Home</router-link>
     <router-link :to="{ name: 'test'}">Test</router-link>
+    <router-link :to="{ name: 'register'}">Register</router-link>
     <form @submit.prevent="login">
       <input type="email" name="email" v-model="loginForm.email" />
       <input type="password" name="password" v-model="loginForm.password" />
