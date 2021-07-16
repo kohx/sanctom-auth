@@ -9,7 +9,7 @@
 
 <script>
 export default {
-  name: "Home",
+  name: "Test",
   data() {
     return {
       message: 'Unauthorized'

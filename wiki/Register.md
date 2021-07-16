@@ -1,8 +1,8 @@
-# Login
+# Register
 
 ## サンプルリポジトリ
 
-[basic(Login)](https://github.com/kohx/sanctom-auth/releases/tag/v1.0)  
+[Register](https://github.com/kohx/sanctom-auth/releases/tag/v1.0.1)  
 
 ### サンプルから始める場合
 
@@ -273,6 +273,7 @@ class VerificationMail extends Mailable
     use Queueable, SerializesModels;
 
     protected $token;
+    protected $verifyRoute = 'verify';
 
     /**
      * Create a new message instance.
@@ -302,7 +303,7 @@ class VerificationMail extends Mailable
         // .envの「APP_URL」に設定したurlを取得
         $baseUrl = config('app.url');
         $token = $this->token;
-        $url = "{$baseUrl}/verification/{$token}";
+        $url = "{$baseUrl}/{$this->verifyRoute}/{$token}";
 
         // 送信元のアドレス
         // .envの「MAIL_FROM_ADDRESS」に設定したアドレスを取得
@@ -452,7 +453,6 @@ export default {
   },
   methods: {
     async register() {
-      // login
       const { data, status } = await axios.post("register", this.registerForm);
       if (status === 200) {
         alert(data.message);

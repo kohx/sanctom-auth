@@ -1,8 +1,9 @@
 <template>
   <div class="container">
     <h1>Register</h1>
-    <router-link :to="{ name: 'home'}">Home</router-link>
-    <router-link :to="{ name: 'login'}">Login</router-link>
+    <Message :title="message" :contents="errors" @close="close" />
+    <router-link :to="{ name: 'home' }">Home</router-link>
+    <router-link :to="{ name: 'login' }">Login</router-link>
     <form @submit.prevent="register">
       <input
         type="name"
@@ -34,8 +35,12 @@
 </template>
 
 <script>
+import Message from "@/components/Message.vue";
 export default {
   name: "Register",
+  components: {
+    Message,
+  },
   data() {
     return {
       registerForm: {
@@ -44,15 +49,23 @@ export default {
         password: "11111111",
         password_confirmation: "11111111",
       },
+      message: null,
+      errors: null,
     };
   },
   methods: {
     async register() {
-      // login
       const { data, status } = await axios.post("register", this.registerForm);
       if (status === 200) {
-        alert(data.message);
+        this.message = data.message;
+      } else {
+        this.message = data.message;
+        this.errors = data.errors || null
       }
+    },
+    close() {
+      this.message = null;
+      this.errors = null;
     },
   },
 };

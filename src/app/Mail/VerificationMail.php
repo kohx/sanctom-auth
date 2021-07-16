@@ -12,6 +12,7 @@ class VerificationMail extends Mailable
     use Queueable, SerializesModels;
 
     protected $token;
+    protected $verifyRoute = 'verify';
 
     /**
      * Create a new message instance.
@@ -41,7 +42,7 @@ class VerificationMail extends Mailable
         // .envの「APP_URL」に設定したurlを取得
         $baseUrl = config('app.url');
         $token = $this->token;
-        $url = "{$baseUrl}/verification/{$token}";
+        $url = "{$baseUrl}/{$this->verifyRoute}/{$token}";
 
         // 送信元のアドレス
         // .envの「MAIL_FROM_ADDRESS」に設定したアドレスを取得

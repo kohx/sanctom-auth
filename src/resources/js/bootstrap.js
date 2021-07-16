@@ -10,11 +10,34 @@ window.axios = require('axios');
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
+// ベースURLの設定
+const baseUrl = process.env.MIX_URL;
+
 // ベースURLに api を追加
-window.axios.defaults.baseURL = `api`;
+window.axios.defaults.baseURL = `${baseUrl}/api/`;
 
 // 自動的にクッキーをクライアントサイドに送信
 window.axios.defaults.withCredentials = true;
+
+// requestの設定
+window.axios.interceptors.request.use(config => {
+
+    return config;
+});
+
+// responseの設定
+// API通信の成功、失敗でresponseの形が変わるので、どちらとも response にレスポンスオブジェクトを代入
+window.axios.interceptors.response.use(
+    // 成功時の処理
+    response => {
+        // ローディングストアのステータスをFALSE
+        return response;
+    },
+    // 失敗時の処理
+    error => {
+        return error.response || error;
+    }
+);
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening

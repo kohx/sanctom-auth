@@ -30,4 +30,12 @@ npm run watch
 
 - [Login](/wiki/Login.md)
 - [Register](/wiki/Register.md)
-- [verify](/wiki/verify.md)
+- [Verify](/wiki/Verify.md)
+- AuthCLASS
+<!-- - [Forgot](/wiki/Forgot.md) -->
+<!-- - [Reset](/wiki/Reset.md) -->
+<!-- - [Vuex](/wiki/Vuex.md) -->
+<!-- - [Workbox](/wiki/Workbox.md) -->
+<!-- - [Modules](/wiki/Modules.md) -->
+<!-- - [Component](/wiki/component.md) -->
+<!-- - [Error](/wiki/error.md) -->

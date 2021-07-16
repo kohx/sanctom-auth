@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\RegisterUser;
 use App\Mail\VerificationMail;
 
-class RegisterController extends Controller
+class RegisterController extends AuthController
 {
     /**
      * Send Register Link Email
@@ -22,6 +20,9 @@ class RegisterController extends Controller
      */
     public function register(Request $request)
     {
+        // already logged in
+        $this->alreadyLogin($request);
+
         // validation
         $this->validateRegister($request);
 
@@ -34,42 +35,19 @@ class RegisterController extends Controller
         // send email
         $this->sendVerificationMail($registerUser);
 
-        return response()->json([
-            'message' => 'send email',
-        ], 200);
+        // success response
+        return $this->responseSuccess('sent email.');
     }
 
     /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    protected function validateRegister(Request $request)
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-    }
-
-    /**
-     * create activation token
-     * トークンを作成する
-     * @return string
-     */
-    private function createToken()
-    {
-        return hash_hmac('sha256', Str::random(40), config('app.key'));
-    }
-
-    /**
-     * delete old data and insert data ata register user table
+     * setRegisterUser
      * 古いデータが有れば削除して新しいデータをインサート
+     *
      * @param Request $request
+     * @param string $token
+     * @return RegisterUser
      */
-    private function setRegisterUser(Request $request, $token)
+    private function setRegisterUser(Request $request, string $token)
     {
         // delete old data
         // 同じメールアドレスが残っていればテーブルから削除
@@ -88,20 +66,20 @@ class RegisterController extends Controller
         // RegisterUser instance save
         $registerUser->save();
 
+        // registered user
         return $registerUser;
     }
 
     /**
-     * send verification mail
-     * メールクラスでメールを送信
+     * sendVerificationMail
      *
-     * @param User $registerUser
+     * @param RegisterUser $registerUser
      * @return void
      */
-    private function sendVerificationMail($registerUser)
+    private function sendVerificationMail(RegisterUser $registerUser)
     {
         Mail::to($registerUser->email)
-            ->send(new VerificationMail($registerUser->token));
-        // ->queue(new VerificationMail($registerUser->token));
+            // ->send(new VerificationMail($registerUser->token));
+            ->queue(new VerificationMail($registerUser->token));
     }
 }

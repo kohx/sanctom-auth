@@ -1,9 +1,10 @@
 <template>
   <div class="container">
     <h1>Login</h1>
-    <router-link :to="{ name: 'home'}">Home</router-link>
-    <router-link :to="{ name: 'test'}">Test</router-link>
-    <router-link :to="{ name: 'register'}">Register</router-link>
+    <Message :title="message" :contents="errors" @close="close" />
+    <router-link :to="{ name: 'home' }">Home</router-link>
+    <router-link :to="{ name: 'test' }">Test</router-link>
+    <router-link :to="{ name: 'register' }">Register</router-link>
     <form @submit.prevent="login">
       <input type="email" name="email" v-model="loginForm.email" />
       <input type="password" name="password" v-model="loginForm.password" />
@@ -17,8 +18,12 @@
 </template>
 
 <script>
+import Message from "@/components/Message.vue";
 export default {
-  name: "Home",
+  name: "Login",
+  components: {
+    Message,
+  },
   data() {
     return {
       user: {
@@ -31,6 +36,8 @@ export default {
         password: "password",
         remember: true,
       },
+      message: null,
+      errors: null,
     };
   },
   methods: {
@@ -44,18 +51,28 @@ export default {
         this.user.id = data.user.id;
         this.user.name = data.user.name;
         this.user.email = data.user.email;
-        alert(data.message);
+        this.message = data.message;
+      } else {
+        this.message = data.message;
+        this.errors = data.errors || null;
       }
     },
     async logout() {
       // logout
-      const { data, status } = await axios.post("/logout");
+      const { data, status } = await axios.post("logout");
       if (status === 200) {
         this.user.id = null;
         this.user.name = null;
         this.user.email = null;
-        alert(data.message);
+        this.message = data.message;
+      } else {
+        this.message = data.message;
+        this.errors = data.errors || null;
       }
+    },
+    close() {
+      this.message = null;
+      this.errors = null;
     },
   },
   async created() {

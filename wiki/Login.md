@@ -39,6 +39,20 @@ docker-compose exec php bash
 composer create-project --prefer-dist laravel/laravel .
 composer require laravel/ui
 composer require laravel/sanctum
+# npm-check-updatesインストール
+npm i -g npm-check-updates
+# モジュールアップデート確認
+ncu -u
+# モジュールアップデート
+npm update
+
+# vue3
+# laravel-mix < 6.0.6
+npm install -save-dev laravel-mix@next vue@next
+# laravel-mix >= 6.0.6
+npm install -save-dev vue@next
+
+npm i vue-router@next
 ```
 
 ### .envの設定
@@ -675,7 +689,7 @@ export default router
 
 <script>
 export default {
-  name: "Home",
+  name: "Login",
   data() {
     return {
       user: {
@@ -746,7 +760,7 @@ export default {
 
 <script>
 export default {
-  name: "Home",
+  name: "Test",
   data() {
     return {
       message: 'Unauthorized'

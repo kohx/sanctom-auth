@@ -1,14 +1,14 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import {
+    createRouter,
+    createWebHistory
+} from 'vue-router'
 
 import Home from '@/pages/front/Home.vue'
 import Test from '@/pages/front/Test.vue'
 import Login from '@/pages/front/Login.vue'
 import Register from '@/pages/front/Register.vue'
-
-// VueRouterをVueで使う
-Vue.use(VueRouter)
-
+import Verify from '@/pages/front/Verify.vue'
+import NotFound from '@/pages/errors/NotFound.vue'
 // パスとページの設定
 const routes = [
     // Home
@@ -46,14 +46,32 @@ const routes = [
         path: '/register',
         // インポートしたページ
         component: Register,
+    },
+    // Verify
+    {
+        // ルートネーム
+        name: 'verify',
+        // urlのパス
+        path: '/verify/:token',
+        // インポートしたページ
+        component: Verify,
+        props: true,
+    },
+    // not found
+    {
+        // 定義されたルート以外のパスでのアクセスは <NotFound> が表示
+        path: '/:pathMatch(.*)*',
+        // ルートネーム
+        name: 'not-found',
+        component: NotFound
     }
 ]
 
 // VueRouterインスタンス
-const router = new VueRouter({
+const router = createRouter({
     // いつもどうりのURLを使うために「history」モードにする
-    mode: 'history',
-    routes
+    history: createWebHistory(),
+    routes: routes,
 })
 
 // VueRouterインスタンスをエクスポート

@@ -2,15 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use Exception;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 
-use Illuminate\Validation\ValidationException;
-
-final class LoginController extends Controller
+final class LoginController extends AuthController
 {
     use ThrottlesLogins;
 
@@ -21,144 +17,75 @@ final class LoginController extends Controller
     protected $decayMinutes = 1;
 
     /**
+     * login
+     *
      * @param Request $request
-     * @return Json
-     * @throws Exception
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws HttpException
      */
     public function login(Request $request)
     {
+        // already logged in
+        $this->alreadyLogin($request);
+
         // validate
         $this->validateLogin($request);
 
         // too many login
         if (method_exists($this, 'hasTooManyLoginAttempts') && $this->hasTooManyLoginAttempts($request)) {
 
+            // event
             $this->fireLockoutEvent($request);
 
+            // Lockout response
             return $this->sendLockoutResponse($request);
         }
 
         // check login
         if ($this->attemptLogin($request)) {
 
+            // regenerate token
+            $request->session()->regenerate();
+
+            // ログイン失敗をリセット
+            $this->clearLoginAttempts($request);
+
             // success login response
-            return $this->sendSuccessLoginResponse($request);
+            return $this->responseSuccess('Logged in.', [
+                'user' => $request->user()
+            ]);
         }
 
-        // failed login response
+        // ログイン試行をカウントアップ
         $this->incrementLoginAttempts($request);
-        return $this->sendFailedLoginResponse($request);
-    }
 
-    /**
-     * @param Request $request
-     * @return Json
-     */
-    public function logout(Request $request)
-    {
-        $this->getGuard()->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json(['message' => 'Logged out'], 200);
-    }
-
-    /**
-     * get guard
-     *
-     * @return Guard
-     */
-    private function getGuard()
-    {
-        return Auth::guard(config('auth.defaults.guard'));
-    }
-
-    /**
-     * Get the login username to be used by the controller.
-     * ユーザネームをemailにするかnameにするか
-     *
-     * @return string
-     */
-    protected function username()
-    {
-        return 'email';
-    }
-
-    /**
-     * Validate the user login request.
-     * usernameとpasswordのバリデーション
-     *
-     * @param  Request $request
-     * @return Void
-     *
-     * @throws ValidationException
-     */
-    private function validateLogin(Request $request)
-    {
-        $request->validate([
-            $this->username() => 'required|string',
-            'password' => 'required|string',
-            'remember' => 'boolean',
+        // fail login response
+        return $this->responseFailed('invalid data.', [
+            $this->username() => ['auth.failed']
         ]);
     }
 
     /**
-     * Get the needed authorization credentials from the request.
-     * 認証に使うパラメータを取得
+     * logout
      *
-     * @param  Request $request
-     * @return Array
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    private function credentials(Request $request)
+    public function logout(Request $request)
     {
-        return $request->only($this->username(), 'password');
-    }
+        // logout
+        $this->getGuard()->logout();
 
-    /**
-     * Attempt to log the user into the application.
-     * ログインさせる
-     *
-     * @param  Request $request
-     * @return bool
-     */
-    private function attemptLogin(Request $request)
-    {
-        return $this->getGuard()->attempt(
-            $this->credentials($request),
-            $request->filled('remember')
-        );
-    }
+        // session refresh
+        $request->session()->invalidate();
 
-    /**
-     * Send the response after the user was authenticated.
-     * ログイン成功のレスポンス
-     *
-     * @param  Request $request
-     * @return Json
-     */
-    private function sendSuccessLoginResponse(Request $request)
-    {
-        $request->session()->regenerate();
-        $this->clearLoginAttempts($request);
+        // regenerate token
+        $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'Logged in',
-            'user' => $request->user(),
-        ], 200);
-    }
-
-    /**
-     * Get the failed login response instance.
-     * ログイン失敗のレスポンス
-     *
-     * @throws ValidationException
-     */
-    private function sendFailedLoginResponse()
-    {
-        // throw new Exception('ログインに失敗しました。再度お試しください');
-
-        throw ValidationException::withMessages([
-            $this->username() => [trans('auth.failed')],
+        // success login response
+        return $this->responseSuccess('Logged out.', [
+            'user' => $request->user()
         ]);
     }
 }
