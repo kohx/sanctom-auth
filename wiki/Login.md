@@ -13,7 +13,6 @@ npm i
 php artisan key:generate
 php artisan config:clear
 php artisan config:cache
-npm run watch
 ```
 
 ## 参考サイト
@@ -61,6 +60,8 @@ npm i vue-router@next
 #...
 APP_URL=https://localhost:3000
 
+MIX_URL="${APP_URL}"
+
 LOG_CHANNEL=stack
 LOG_LEVEL=debug
 
@@ -73,7 +74,7 @@ DB_PASSWORD=docker
 
 BROADCAST_DRIVER=log
 CACHE_DRIVER=redis
-FILESYSTEM_DRIVER=redis
+FILESYSTEM_DRIVER=s3
 QUEUE_CONNECTION=redis
 SESSION_DRIVER=redis
 SESSION_LIFETIME=120

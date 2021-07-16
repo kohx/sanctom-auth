@@ -18424,7 +18424,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   name: "Test",
   data: function data() {
     return {
-      message: 'Unauthorized'
+      message: "Unauthorized"
     };
   },
   created: function created() {
@@ -18444,12 +18444,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               _yield$axios$get = _context.sent;
               data = _yield$axios$get.data;
               status = _yield$axios$get.status;
+              console.log(status);
+              console.log(data.message);
 
               if (status === 200) {
                 _this.message = data.message;
+              } else {
+                console.log(data.message);
               }
 
-            case 6:
+            case 8:
             case "end":
               return _context.stop();
           }
@@ -19206,7 +19210,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.message[data-v-b91a6428] {\n  border: 1px solid cadetblue;\n  padding: 1rem;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.message[data-v-b91a6428] {\r\n  border: 1px solid cadetblue;\r\n  padding: 1rem;\n}\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
