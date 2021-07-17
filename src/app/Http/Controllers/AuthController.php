@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 abstract class AuthController extends Controller
@@ -58,6 +59,18 @@ abstract class AuthController extends Controller
     }
 
     /**
+     * password hash
+     * パスワードのhash
+     *
+     * @param string $password
+     * @return string
+     */
+    protected function passwordHash($password)
+    {
+        return Hash::make($password);
+    }
+
+    /**
      * create activation token
      * トークンを作成する
      * @return string
@@ -99,6 +112,19 @@ abstract class AuthController extends Controller
             $this->username() => 'required|string',
             'password' => 'required|string',
             'remember' => 'boolean',
+        ]);
+    }
+
+    /**
+     * validateReset
+     *
+     * @param  Request $request
+     * @return void
+     */
+    protected function validateReset(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email'
         ]);
     }
 

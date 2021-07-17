@@ -84,8 +84,6 @@ final class LoginController extends AuthController
         $request->session()->regenerateToken();
 
         // success login response
-        return $this->responseSuccess('Logged out.', [
-            'user' => $request->user()
-        ]);
+        return $this->responseSuccess('Logged out.');
     }
 }

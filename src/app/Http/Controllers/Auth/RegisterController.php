@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\AuthController;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Models\RegisterUser;
@@ -61,7 +60,7 @@ class RegisterController extends AuthController
         $registerUser->token = $token;
 
         // set hash password
-        $registerUser->password = Hash::make($request->password);
+        $registerUser->password = $this->passwordHash($request->password);
 
         // RegisterUser instance save
         $registerUser->save();
