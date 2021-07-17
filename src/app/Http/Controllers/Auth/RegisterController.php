@@ -11,11 +11,12 @@ use App\Mail\VerificationMail;
 class RegisterController extends AuthController
 {
     /**
-     * Send Register Link Email
-     * 送られてきた内容をテーブルに保存して認証メールを送信
+     * Register
      *
      * @param Request $request
-     * @return RegisterUser
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws HttpException
      */
     public function register(Request $request)
     {

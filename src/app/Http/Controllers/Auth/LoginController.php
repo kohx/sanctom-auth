@@ -61,7 +61,7 @@ final class LoginController extends AuthController
         $this->incrementLoginAttempts($request);
 
         // fail login response
-        return $this->responseFailed('invalid data.', [
+        return $this->responseInvalid('invalid data.', [
             $this->username() => ['auth.failed']
         ]);
     }

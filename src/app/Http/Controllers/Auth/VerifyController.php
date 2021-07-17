@@ -28,7 +28,6 @@ class VerifyController extends AuthController
         // 取得できなかった場合
         if (!$registerUser) {
 
-            // fail verify response
             return $this->responseFailed('register not found.');
         }
 

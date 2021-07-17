@@ -10,7 +10,15 @@ use App\Mail\ResetPasswordMail;
 
 class ForgotController extends AuthController
 {
-    public function login(Request $request)
+    /**
+     * forget
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws HttpException
+     */
+    public function forget(Request $request)
     {
         // already logged in
         $this->alreadyLogin($request);

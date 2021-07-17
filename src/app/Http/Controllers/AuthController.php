@@ -7,6 +7,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 abstract class AuthController extends Controller
 {
@@ -81,6 +82,19 @@ abstract class AuthController extends Controller
     }
 
     /**
+     * Determine if the token has expired.
+     *
+     * @param string $createdAt
+     * @return bool
+     */
+    protected function tokenExpired($expires, $createdAt)
+    {
+        return Carbon::parse($createdAt)
+            ->addSeconds($expires)
+            ->isPast();
+    }
+
+    /**
      * alreadyLogin
      *
      * @param  Request $request
@@ -124,7 +138,8 @@ abstract class AuthController extends Controller
     protected function validateReset(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email'
+            'email' => 'required|email|exists:users,email',
+            'password' => ['required', 'min:8', 'confirmed'],
         ]);
     }
 
@@ -161,10 +176,23 @@ abstract class AuthController extends Controller
      * 失敗のレスポンス
      *
      * @param string $message
+     * @param array $additions
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function responseFailed(string $message)
+    {
+        return response()->json(['message' => trans($message)], 403);
+    }
+
+    /**
+     * responseInvalid
+     * インヴァリッドのレスポンス
+     *
+     * @param string $message
      * @param array $errors array in array
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function responseFailed(string $message, array $errors = [])
+    protected function responseInvalid(string $message, array $errors = [])
     {
         foreach ($errors as &$error) {
             foreach ($error as &$value) {
