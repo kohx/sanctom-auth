@@ -6,34 +6,34 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Models\PasswordReset;
-use App\Mail\ResetPasswordMail;
+use App\Mail\PasswordResetMail;
 
 class ForgotController extends AuthController
 {
     /**
-     * forget
+     * forgot
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      *
      * @throws HttpException
      */
-    public function forget(Request $request)
+    public function forgot(Request $request)
     {
         // already logged in
         $this->alreadyLogin($request);
 
         // validate
-        $this->validateReset($request);
+        $this->validateForgot($request);
 
         // create token
         $token = $this->createToken();
 
         // set data
-        $resetPassword = $this->setResetPassword($request, $token);
+        $passwordReset = $this->setPasswordReset($request, $token);
 
         // send email
-        $this->sendResetPasswordMail($resetPassword);
+        $this->sendPasswordResetMail($passwordReset);
 
         // success response
         return $this->responseSuccess('sent email.');
@@ -45,9 +45,9 @@ class ForgotController extends AuthController
      *
      * @param Request $request
      * @param string $token
-     * @return ResetPassword
+     * @return PasswordReset
      */
-    private function setRegisterUser(Request $request, string $token)
+    private function setPasswordReset(Request $request, string $token)
     {
         // delete old data
         // 同じメールアドレスが残っていればテーブルから削除
@@ -69,10 +69,10 @@ class ForgotController extends AuthController
      * @param PasswordReset $passwordReset
      * @return void
      */
-    private function sendResetPasswordMail(PasswordReset $passwordReset)
+    private function sendPasswordResetMail(PasswordReset $passwordReset)
     {
         Mail::to($passwordReset->email)
             // ->send(new ResetPasswordMail($passwordReset->token));
-            ->queue(new ResetPasswordMail($passwordReset->token));
+            ->queue(new PasswordResetMail($passwordReset->token));
     }
 }

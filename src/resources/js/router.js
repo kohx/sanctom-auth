@@ -8,7 +8,10 @@ import Test from '@/pages/front/Test.vue'
 import Login from '@/pages/front/Login.vue'
 import Register from '@/pages/front/Register.vue'
 import Verify from '@/pages/front/Verify.vue'
+import Forgot from '@/pages/front/Forgot.vue'
+import Reset from '@/pages/front/Reset.vue'
 import NotFound from '@/pages/errors/NotFound.vue'
+
 // パスとページの設定
 const routes = [
     // Home
@@ -55,6 +58,25 @@ const routes = [
         path: '/verify/:token',
         // インポートしたページ
         component: Verify,
+        props: true,
+    },
+    // Forgot
+    {
+        // Forgot
+        name: 'forgot',
+        // urlのパス
+        path: '/forgot',
+        // インポートしたページ
+        component: Forgot,
+    },
+    // Reset
+    {
+        // Reset
+        name: 'reset',
+        // urlのパス
+        path: '/reset/:token',
+        // インポートしたページ
+        component: Reset,
         props: true,
     },
     // not found

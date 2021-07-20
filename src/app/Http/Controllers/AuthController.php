@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rules\Password;
 
 abstract class AuthController extends Controller
 {
@@ -130,20 +131,6 @@ abstract class AuthController extends Controller
     }
 
     /**
-     * validateReset
-     *
-     * @param  Request $request
-     * @return void
-     */
-    protected function validateReset(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'password' => ['required', 'min:8', 'confirmed'],
-        ]);
-    }
-
-    /**
      * Validate the user register request.
      *
      * @param array $data
@@ -154,7 +141,33 @@ abstract class AuthController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', Password::defaults(), 'confirmed'],
+        ]);
+    }
+
+    /**
+     * Validate the forgot request.
+     *
+     * @param array $data
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function validateForgot(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255', 'exists:users,email'],
+        ]);
+    }
+
+    /**
+     * validateReset
+     *
+     * @param  Request $request
+     * @return void
+     */
+    protected function validateReset(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
     }
 

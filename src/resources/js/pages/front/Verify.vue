@@ -1,15 +1,18 @@
 <template>
   <div class="container">
     <h1>Verify</h1>
+    <Nav />
     <Message :title="message" :contents="errors" @close="close" />
   </div>
 </template>
 
 <script>
+import Nav from "@/components/Nav.vue";
 import Message from "@/components/Message.vue";
 export default {
   name: "Verify",
   components: {
+    Nav,
     Message,
   },
   props: {
@@ -36,9 +39,10 @@ export default {
     });
     if (status === 200) {
       this.message = data.message;
+      this.errors = null;
     } else {
       this.message = data.message;
-      this.errors = data.errors || null;
+      this.errors = data.errors;
     }
   },
 };

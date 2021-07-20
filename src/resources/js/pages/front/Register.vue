@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <h1>Register</h1>
+    <Nav />
     <Message :title="message" :contents="errors" @close="close" />
-    <router-link :to="{ name: 'home' }">Home</router-link>
-    <router-link :to="{ name: 'login' }">Login</router-link>
+
     <form @submit.prevent="register">
       <input
         type="name"
@@ -35,10 +35,12 @@
 </template>
 
 <script>
+import Nav from "@/components/Nav.vue";
 import Message from "@/components/Message.vue";
 export default {
   name: "Register",
   components: {
+    Nav,
     Message,
   },
   data() {
@@ -58,9 +60,10 @@ export default {
       const { data, status } = await axios.post("register", this.registerForm);
       if (status === 200) {
         this.message = data.message;
+        this.errors = null;
       } else {
         this.message = data.message;
-        this.errors = data.errors || null
+        this.errors = data.errors;
       }
     },
     close() {

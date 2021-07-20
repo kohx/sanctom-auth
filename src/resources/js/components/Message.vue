@@ -2,12 +2,12 @@
   <div class="message" v-if="title">
     <h3 class="message__title">{{ title }}</h3>
     <div class="message__content" v-for="(content, key) in contents" :key="key">
-      <h4 class="message__content__title">{{ key }}</h4>
-      <ul class="message__content__list">
+      <h4 v-if="key" class="message__content__title">{{ key }}</h4>
+      <ul v-if="key" class="message__content__list">
         <li
           class="message__content__items"
-          v-for="(value, key) in content"
-          :key="key"
+          v-for="(value, index) in content"
+          :key="index"
         >
           {{ value }}
         </li>

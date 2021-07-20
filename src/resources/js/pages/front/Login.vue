@@ -1,10 +1,9 @@
 <template>
   <div class="container">
     <h1>Login</h1>
+    <Nav />
     <Message :title="message" :contents="errors" @close="close" />
-    <router-link :to="{ name: 'home' }">Home</router-link>
-    <router-link :to="{ name: 'test' }">Test</router-link>
-    <router-link :to="{ name: 'register' }">Register</router-link>
+
     <form @submit.prevent="login">
       <input type="email" name="email" v-model="loginForm.email" />
       <input type="password" name="password" v-model="loginForm.password" />
@@ -18,10 +17,12 @@
 </template>
 
 <script>
+import Nav from "@/components/Nav.vue";
 import Message from "@/components/Message.vue";
 export default {
   name: "Login",
   components: {
+    Nav,
     Message,
   },
   data() {
@@ -52,9 +53,10 @@ export default {
         this.user.name = data.user.name;
         this.user.email = data.user.email;
         this.message = data.message;
+        this.errors = null;
       } else {
         this.message = data.message;
-        this.errors = data.errors || null;
+        this.errors = data.errors;
       }
     },
     async logout() {
@@ -65,9 +67,10 @@ export default {
         this.user.name = null;
         this.user.email = null;
         this.message = data.message;
+        this.errors = null;
       } else {
         this.message = data.message;
-        this.errors = data.errors || null;
+        this.errors = data.errors;
       }
     },
     close() {
