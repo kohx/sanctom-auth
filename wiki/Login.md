@@ -1,27 +1,12 @@
 # Login
 
-## サンプルリポジトリ
-
-[basic(Login)](https://github.com/kohx/sanctom-auth/releases/tag/v1.0)  
-
-### サンプルから始める場合
-
-```bash
-composer install
-npm i -g npm
-npm i
-php artisan key:generate
-php artisan config:clear
-php artisan config:cache
-```
-
 ## 参考サイト
 
-- [Laravel Sanctum でSPA(クッキー)認証する](https://qiita.com/ucan-lab/items/3e7045e49658763a9566)
-- [Laravel 8.x Laravel Sanctum](https://readouble.com/laravel/8.x/ja/sanctum.html)
-- [Laravel Sanctum](https://laravel.com/docs/8.x/sanctum)
+* [Laravel Sanctum でSPA(クッキー)認証する](https://qiita.com/ucan-lab/items/3e7045e49658763a9566)
+* [Laravel 8.x Laravel Sanctum](https://readouble.com/laravel/8.x/ja/sanctum.html)
+* [Laravel Sanctum](https://laravel.com/docs/8.x/sanctum)
 
-- [API開発・テスト便利ツール Postmanの使い方メモ](https://qiita.com/zaburo/items/16ac4189d0d1c35e26d1)
+* [API開発・テスト便利ツール Postmanの使い方メモ](https://qiita.com/zaburo/items/16ac4189d0d1c35e26d1)
 
 ## 準備
 
@@ -86,6 +71,7 @@ REDIS_HOST=samctum_redis
 REDIS_PASSWORD=null
 REDIS_PORT=6379
 #...
+
 ```
 
 #### SANCTUM_STATEFUL_DOMAINS
@@ -117,12 +103,13 @@ SPA(Vue, React等)からリクエストを行うドメインを設定する必�
 ```
 
 `config('sanctum.stateful')` を設定する必要があるので各環境に合わせて .env にドメインとポート番号を設定
-ローカル環境では設定は不要だが、設定する場合は`SANCTUM_STATEFUL_DOMAINS=localhost:3000`のように設定
+ローカル環境では設定は不要だが、設定する場合は `SANCTUM_STATEFUL_DOMAINS=localhost:3000` のように設定
 
 ```.env
-SANCTUM_STATEFUL_DOMAINS=api.example.com:443
+SANCTUM_STATEFUL_DOMAINS=www.example.com:443
 ＃ OR
-SANCTUM_STATEFUL_DOMAINS=api.example.com:443
+SANCTUM_STATEFUL_DOMAINS=localhost:3000
+
 ```
 
 #### SESSION_DOMAIN
@@ -142,6 +129,7 @@ null の場合、サブドメイン間でCookieの共有ができない
 
 ```.env
 SESSION_DOMAIN=.example.com
+
 ```
 
 #### SESSION_DRIVER
@@ -238,8 +226,8 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 ### axiosの設定
 
-- ベースURLに`api`を追加
-- SPA側で axios を使う場合は withCredentials オプションを有効にする
+* ベースURLに`api`を追加
+* SPA側で axios を使う場合は withCredentials オプションを有効にする
 
  `resources\js\bootstrap.js`
 
@@ -250,11 +238,20 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
     window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'; // 追加
 
+    // ベースURLの設定
+    const baseUrl = process.env.MIX_URL;
+
     // ベースURLに api を追加
-    window.axios.defaults.baseURL = `api`; // 追加
+    window.axios.defaults.baseURL = `${baseUrl}/api/`;
 
     // 自動的にクッキーをクライアントサイドに送信
-    window.axios.defaults.withCredentials = true; // 追加
+    window.axios.defaults.withCredentials = true;
+
+    // requestの設定
+    window.axios.interceptors.request.use(config => {
+
+        return config;
+    });
 ```
 
 ### キャッシュクリア
@@ -284,19 +281,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 
+// auth 関係
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout']);
 
-
+// sanctum
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
-    Route::post('/user', function (Request $request) {
-        return response()->json([
-            'message' => 'Logged in',
-            'user' => $request->user(),
-        ], 200);
-    });
-
+    // テスト
     Route::get('/test', function () {
         return response()->json([
             'message' => 'Authenticated',
@@ -345,7 +337,7 @@ php artisan route:list
 ログインの流は /csrf-cookie で返却されたXSRFクッキーの中にあるXSRFトークンをX-XSRF-TOKENヘッダにXSRFトークン入れて送る  
 これについてはAxiosが自動で行ってくれる
 
-`app\Http\Controllers\Auth\LoginController.php`
+ `app\Http\Controllers\Auth\LoginController.php`
 
 ```php
 <?php
@@ -533,7 +525,7 @@ mix.webpackConfig({
         }
     })
     .js("resources/js/app.js", "public/js")
-    .vue();
+    .vue(); // 
 
 mix.browserSync({
     // アプリの起動アドレスを「nginx」
