@@ -39,3 +39,6 @@ npm run watch
 <!-- - [Modules](/wiki/Modules.md) -->
 <!-- - [Component](/wiki/component.md) -->
 <!-- - [Error](/wiki/error.md) -->
+
+<!-- - [injection](/wiki/injection.md) -->
+<!-- - [can](/wiki/can.md) -->

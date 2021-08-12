@@ -1,16 +1,4 @@
-# docker
-
-- dockerを使ったlaravel環境の作り方  
-- 「https-portal」を使って「Let's Encrypt」でhttps化（ローカルではなし）
-- 「laravel-mix」で必要な「node」、「npm」もインストール
-- 「CACHE_DRIVER」、「QUEUE_CONNECTION」、「SESSION_DRIVER」ように「redis」も準備
-- 画像編集用に「DG」も準備
-
-## reference
-[https-portal](https://github.com/SteveLTN/https-portal)  
-[https-portal blog](https://re-engines.com/2019/03/28/docker-https-portal/)  
-
-## conditions
+# docker deploy
 
 aws amazon linux2
 
@@ -24,7 +12,153 @@ aws amazon linux2
 * mysql:5.7
 * Node
 
-## docker-comose setup
+## docker install
+
+### yum update
+
+```bash
+sudo yum update -y
+```
+
+### dockerをインストール
+
+```bash
+sudo yum install -y docker
+```
+
+### docker サービスの起動
+
+```bash
+sudo systemctl start docker
+sudo systemctl status docker
+```
+
+### 自動起動設定
+
+```bash
+sudo systemctl enable docker
+```
+
+### 自動起動設定確認
+
+```bash
+sudo systemctl list-unit-files | grep docker.service
+
+# output
+    docker.service          enabled
+```
+
+### ec2-user を docker グループに追加する
+
+```bash
+sudo usermod -a -G docker ec2-user
+```
+
+一度ログアウトし、再度ログインすると、 docker コマンドが利用可能になる。
+
+```bash
+exit
+```
+
+```bash
+docker info
+
+# output
+Client:
+ Context:    default
+ Debug Mode: false
+ Plugins:
+  buildx: Build with BuildKit (Docker Inc., v0.5.1-docker)
+  compose: Docker Compose (Docker Inc., v2.0.0-beta.6)
+  scan: Docker Scan (Docker Inc., v0.8.0)
+
+Server:
+ Containers: 5
+  Running: 5
+  Paused: 0
+  Stopped: 0
+ Images: 5
+ Server Version: 20.10.7
+ Storage Driver: overlay2
+  Backing Filesystem: extfs
+  Supports d_type: true
+  Native Overlay Diff: true
+  userxattr: false
+ Logging Driver: json-file
+ Cgroup Driver: cgroupfs
+ Cgroup Version: 1
+ Plugins:
+  Volume: local
+  Network: bridge host ipvlan macvlan null overlay
+  Log: awslogs fluentd gcplogs gelf journald json-file local logentries splunk syslog
+ Swarm: inactive
+ Runtimes: io.containerd.runc.v2 io.containerd.runtime.v1.linux runc
+ Default Runtime: runc
+ Init Binary: docker-init
+ containerd version: d71fcd7d8303cbf684402823e425e9dd2e99285d
+ runc version: b9ee9c6314599f1b4a7f497e1f1f856fe433d3b7
+ init version: de40ad0
+ Security Options:
+  seccomp
+   Profile: default
+ Kernel Version: 5.10.25-linuxkit
+ Operating System: Docker Desktop
+ OSType: linux
+ Architecture: x86_64
+ CPUs: 2
+ Total Memory: 1.941GiB
+ Name: docker-desktop
+ ID: TD62:O4WJ:EGLJ:DJXX:AZ2A:ATWW:ZCHK:J2XX:4EJK:VIPS:4S46:ITPU
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: true
+  File Descriptors: 81
+  Goroutines: 75
+  System Time: 2021-08-05T05:01:02.9228589Z
+  EventsListeners: 3
+ Registry: https://index.docker.io/v1/
+ Labels:
+ Experimental: false
+ Insecure Registries:
+  127.0.0.0/8
+ Live Restore Enabled: false
+```
+
+### 一時的にスーパーユーザーになる
+
+```bash
+ sudo -i
+```
+
+--->  ここから一時的にスーパーユーザー
+
+### docker-comoseをインストール
+
+```bash
+curl -L "https://github.com/docker/compose/releases/download/1.11.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
+```
+
+### docker-compose コマンドに実行権限付与
+
+```bash
+chmod +x /usr/local/bin/docker-compose
+```
+
+### スーパーユーザーを抜ける
+
+```bash
+exit
+```
+
+<--- スーパーユーザーここまで
+
+### docker-compose コマンドの実行確認
+
+```bash
+docker-compose --version
+    docker-compose version 1.11.2, build dfed245
+```
+
+## docker-comoseの設定
 
 ### directories
 
@@ -38,18 +172,46 @@ www ─┬─ docker ┬─ db ─ conf ─ my.conf
      └─ docker-compose.yml
 ```
 
-### create setting files
+### ディレクトリの作成
 
-`docker/db/conf/my.conf`
+```bash
+cd /var
+sudo mkdir www
+cd www
+```
 
-```conf:docker/db/conf/my.conf
+### dockerディレクトリの作成
+
+```bash
+sudo mkdir docker
+sudo mkdir docker/db
+sudo mkdir docker/db/conf
+sudo mkdir docker/https-portal
+sudo mkdir docker/nginx
+sudo mkdir docker/php
+```
+
+### db my.conf
+
+```bash
+sudo touch docker/db/conf/my.conf
+sudo vim docker/db/conf/my.conf
+```
+
+```conf
+  [mysqld]
   max_allowed_packet = 16M
   default-time-zone = 'Asia/Tokyo'
 ```
 
-`docker/nginx/default.conf`
+### nginx default.conf
 
-```conf:docker/nginx/default.conf
+```bash
+sudo touch docker/nginx/default.conf
+sudo vim docker/nginx/default.conf
+```
+
+```conf
 server {
   listen 80;
     index index.php index.html;
@@ -73,9 +235,14 @@ server {
 }
 ```
 
-`docker/php/php.ini`
+### php.ini
 
-```ini:docker/php/php.ini
+```bash
+sudo touch docker/php/php.ini
+sudo vim docker/php/php.ini
+```
+
+```ini
 [Date]
 date.timezone = "Asia/Tokyo"
 [mbstring]
@@ -89,9 +256,14 @@ xdebug.remote_port=9000
 xdebug.remote_log=/tmp/xdebug.log
 ```
 
-`docker/php/Dockerfile`
+### Dockerfile
 
-```Dockerfile:docker/php/Dockerfile
+```bash
+sudo touch docker/php/Dockerfile
+sudo vim docker/php/Dockerfile
+```
+
+```Dockerfile
 FROM php:8.0-fpm
 
 COPY php.ini /usr/local/etc/php/
@@ -148,9 +320,14 @@ WORKDIR /var/www
 RUN composer global require "laravel/installer"
 ```
 
-`docker-compose.yml`
+### docker-compose.yml
 
-```yml:docker-compose.yml
+```bash
+sudo touch docker-compose.yml
+sudo vim docker-compose.yml
+```
+
+```yml
 # Docker Composeのバージョン
 version: "3"
 
@@ -172,11 +349,11 @@ services:
     restart: always
     environment:
       # - for prod -
-      # DOMAINS: "example.com -> http://nginx, www.example.com -> http://nginx" # <-- domain
-      # STAGE: "production"
+      DOMAINS: "example.com -> http://nginx, www.example.com -> http://nginx" # <-- domain
+      STAGE: "production"
       # - for dev -
-      DOMAINS: "localhost -> http://nginx"
-      STAGE: "local"
+      # DOMAINS: "localhost -> http://nginx"
+      # STAGE: "local"
 
   ## phpサービス
   php:
@@ -188,8 +365,8 @@ services:
     volumes:
       - ./src:/var/www
     ports:
-      - "3000:3000"
-      - "3001:3001"
+      # - "3000:3000" # 閉じる
+      # - "3001:3001" # 閉じる
 
   ## nginxサービス
   nginx:
@@ -251,68 +428,6 @@ services:
       - ./docker/redis/data:/data
 ```
 
-### laravel envの準備
-
-`.env`
-
-```.env
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=base64:QVRzqfg8dRym9U3B4I4PhIeDD+sOUNNyRmYis9fESgE=
-APP_DEBUG=true
-APP_URL=http://localhost
-
-LOG_CHANNEL=stack
-LOG_LEVEL=debug
-
-DB_CONNECTION=mysql
-DB_HOST=feature_db
-DB_PORT=3306
-DB_DATABASE=database
-DB_USERNAME=docker
-DB_PASSWORD=docker
-
-BROADCAST_DRIVER=log
-CACHE_DRIVER=redis
-FILESYSTEM_DRIVER=local
-QUEUE_CONNECTION=redis
-SESSION_DRIVER=redis
-SESSION_LIFETIME=120
-
-MEMCACHED_HOST=127.0.0.1
-
-REDIS_HOST=feature_redis
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-MAIL_MAILER=
-MAIL_HOST=
-MAIL_PORT=
-MAIL_USERNAME=
-MAIL_PASSWORD=
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=info@exmple.com
-MAIL_FROM_NAME="${APP_NAME}"
-
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=
-AWS_BUCKET=
-AWS_URL=
-AWS_USE_PATH_STYLE_ENDPOINT=false
-
-PUSHER_APP_ID=
-PUSHER_APP_KEY=
-PUSHER_APP_SECRET=
-PUSHER_APP_CLUSTER=mt1
-
-MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
-MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
-
-```
-
-## docker start at local
-
 ### docker start
 
 ```bash
@@ -321,8 +436,7 @@ docker-compose up -d
 docker-compose exec php bash
 
 composer create-project "laravel/laravel=8.*" . --prefer-dist
-# or
-# laravelソースを持ってくる
+# or laravelソースを持ってくる
 
 composer install
 composer dump-autoload

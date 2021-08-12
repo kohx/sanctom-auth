@@ -19615,7 +19615,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.message[data-v-b91a6428] {\n  border: 1px solid cadetblue;\n  padding: 1rem;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.message[data-v-b91a6428] {\r\n  border: 1px solid cadetblue;\r\n  padding: 1rem;\n}\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -19639,7 +19639,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.nav[data-v-7cd4f788] {\n}\n.nav__title[data-v-7cd4f788] {\n}\n.nav__list[data-v-7cd4f788] {\n    display: flex;\n    list-style: none;\n}\n.nav__item[data-v-7cd4f788] {\n    border: 1px solid gray;\n}\n.nav__item a[data-v-7cd4f788] {\n    color: inherit;\n    text-decoration: none;\n    padding: 1rem;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.nav[data-v-7cd4f788] {\n}\n.nav__title[data-v-7cd4f788] {\n}\n.nav__list[data-v-7cd4f788] {\r\n    display: flex;\r\n    list-style: none;\n}\n.nav__item[data-v-7cd4f788] {\r\n    border: 1px solid gray;\n}\n.nav__item a[data-v-7cd4f788] {\r\n    color: inherit;\r\n    text-decoration: none;\r\n    padding: 1rem;\n}\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
