@@ -6,6 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class VerificationMail extends Mailable
 {
@@ -30,27 +32,18 @@ class VerificationMail extends Mailable
      *
      * @return $this
      */
-    public function build()
+    public function build(Request $request)
     {
         // 件名
         $subject = 'Verification mail';
 
-        // コールバックURLをルート名で取得
-        //TODO: これだとホットリロードでホストがおかしくなる
-        // $url = route($this->verifyRoute, ['token' => $this->token]);
-
-        // .envの「APP_URL」に設定したurlを取得
+        // VueへのコールバックURLをルート名で取得
         $baseUrl = config('app.url');
         $token = $this->token;
         $url = "{$baseUrl}/{$this->verifyRoute}/{$token}";
 
-        // 送信元のアドレス
-        // .envの「MAIL_FROM_ADDRESS」に設定したアドレスを取得
-        $from = config('mail.from.address');
-
         // メール送信
         return $this
-            ->from($from)
             ->subject($subject)
             // 送信メールのビュー
             ->view('mails.verification_mail')

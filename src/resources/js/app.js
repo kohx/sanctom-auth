@@ -11,6 +11,12 @@ import App from "./App.vue"
 // ルーターをインポート
 import router from "./router"
 
-const app = createApp(App)
-    .use(router)
-    .mount('#app')
+
+const funcApp = async () => {
+
+    return createApp(App)
+        .use(router)
+        .mount('#app')
+}
+
+const app = funcApp();

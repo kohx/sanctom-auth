@@ -35,11 +35,7 @@ class PasswordResetMail extends Mailable
         // 件名
         $subject = __('reset password mail');
 
-        // コールバックURLをルート名で取得
-        // TODO: これだとホットリロードでホストがおかしくなる
-        // $url = route($this->resetRoute, ['token' => $this->token]);
-
-        // .envの「APP_URL」に設定したurlを取得
+        // VueへのコールバックURLをルート名で取得
         $baseUrl = config('app.url');
         $token = $this->token;
         $url = "{$baseUrl}/{$this->resetRoute}/{$token}";

@@ -5,11 +5,11 @@ import {
 
 import Home from '@/pages/front/Home.vue'
 import Test from '@/pages/front/Test.vue'
-import Login from '@/pages/front/Login.vue'
-import Register from '@/pages/front/Register.vue'
-import Verify from '@/pages/front/Verify.vue'
-import Forgot from '@/pages/front/Forgot.vue'
-import Reset from '@/pages/front/Reset.vue'
+import Login from '@/pages/auth/Login.vue'
+import Register from '@/pages/auth/Register.vue'
+import Verify from '@/pages/auth/Verify.vue'
+import Forgot from '@/pages/auth/Forgot.vue'
+import Reset from '@/pages/auth/Reset.vue'
 import NotFound from '@/pages/errors/NotFound.vue'
 
 // パスとページの設定

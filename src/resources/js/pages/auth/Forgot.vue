@@ -47,16 +47,3 @@ export default {
   },
 };
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
