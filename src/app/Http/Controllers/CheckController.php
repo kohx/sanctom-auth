@@ -3,18 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Post;
 
 class CheckController extends Controller
 {
-
     public function index(Request $request)
     {
-        Storage::cloud()->url($this->attributes['path']);
-        $updatePhotos[] = Storage::cloud()->putFileAs('photos', $photoFile, $filename, 'public');
-        Storage::cloud()->delete($updatePhoto);
+        dump(Post::all()->toArray());
+    }
 
-        asset('storage/file.txt')
+    public function show(Request $request, Post $post)
+    {
+        dump($post->toArray());
+    }
 
+    public function store(Request $request, Post $post)
+    {
+        dump($post->toArray());
+    }
+
+    public function destroy(Request $request, Post $post)
+    {
+        dump($post->toArray());
     }
 }
