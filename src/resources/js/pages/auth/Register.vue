@@ -46,10 +46,10 @@ export default {
   data() {
     return {
       registerForm: {
-        name: "user0",
-        email: "user0@example.com",
-        password: "11111111",
-        password_confirmation: "11111111",
+        name: "asdf",
+        email: "asdf@example.com",
+        password: "Aa@111111",
+        password_confirmation: "Aa@111111",
       },
       message: null,
       errors: null,

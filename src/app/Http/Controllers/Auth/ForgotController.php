@@ -36,7 +36,7 @@ class ForgotController extends AuthController
         $this->sendPasswordResetMail($passwordReset);
 
         // success response
-        return $this->responseSuccess('sent email.');
+        return $this->responseSuccess(trans('sent email.'));
     }
 
     /**
@@ -72,7 +72,7 @@ class ForgotController extends AuthController
     private function sendPasswordResetMail(PasswordReset $passwordReset)
     {
         Mail::to($passwordReset->email)
-            // ->send(new ResetPasswordMail($passwordReset->token));
+            // ->send(new PasswordResetMail($passwordReset->token));
             ->queue(new PasswordResetMail($passwordReset->token));
     }
 }

@@ -1,0 +1,14 @@
+{
+    "----- auth -----": "",
+    "Already logged in.": "すでにログインしています。",
+    "Logged in.": "ログインしました。",
+    "Invalid data.": "",
+    "Logged out.": "・ログアウトしました。",
+    "Sent email.": "メールを送りました。",
+    "Reset request not found.": "リセットパスワードをリクエストされていません。",
+    "Token expired.": "リセットパスワードの有効期限を過ぎました。",
+    "Please change password.": "パスワードをリセット",
+    "Password changed.": "パスワード変更しました。",
+    "Register not found.": "仮登録がされていません。",
+    "----- end -----": ""
+}

@@ -1,4 +1,4 @@
-FROM php:7.4-fpm
+FROM php:8.0-fpm
 
 COPY php.ini /usr/local/etc/php/
 
@@ -50,3 +50,5 @@ RUN apt-get install -y vim
 
 # workdir
 WORKDIR /var/www
+
+RUN composer global require "laravel/installer"

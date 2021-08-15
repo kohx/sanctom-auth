@@ -1,3 +1,16 @@
+# sanctum reset
+
+## Resetコントローラ
+
+基本的なメソッドは`AuthController`にあるのでエクステンドする
+
+```bash
+php artisan make:controller Auth/ResetController
+```
+
+`app\Http\Controllers\Auth\ResetController.php`
+
+```php
 <?php
 
 namespace App\Http\Controllers\Auth;
@@ -30,7 +43,7 @@ class ResetController extends AuthController
         $passwordReset = $this->getPasswordReset($request->token);
         if (!$passwordReset) {
 
-            return $this->responseFailed(trans('Reset request not found.'));
+            return $this->responseFailed('reset request not found.');
         }
 
         // config\auth.phpで設定した値を取得、ない場合はもとの値
@@ -39,11 +52,11 @@ class ResetController extends AuthController
         // トークン期限切れチェック
         if ($this->tokenExpired($this->expires, $passwordReset->created_at)) {
 
-            return $this->responseFailed(trans('Token expired.'));
+            return $this->responseFailed('token expired.');
         }
 
         // success response
-        return $this->responseSuccess(trans('Please change password.'));
+        return $this->responseSuccess('in reset password');
     }
 
     /**
@@ -63,13 +76,13 @@ class ResetController extends AuthController
         $passwordReset = $this->getPasswordReset($request->token);
         if (!$passwordReset) {
 
-            return $this->responseFailed(trans('Reset request not found.'));
+            return $this->responseFailed('reset request not found.');
         }
 
         // トークン期限切れチェック
         if ($this->checkTokenExpired($passwordReset)) {
 
-            return $this->responseFailed(trans('Token expired.'));
+            return $this->responseFailed('token expired.');
         }
 
         // validate
@@ -82,7 +95,7 @@ class ResetController extends AuthController
         // auth()->loginUsingId($user->id, true);
 
         // success login response
-        return $this->responseSuccess(trans('Password changed.'), [
+        return $this->responseSuccess('password changed.', [
             // 'user' => $request->user()
         ]);
     }
@@ -145,3 +158,148 @@ class ResetController extends AuthController
         return $user;
     }
 }
+```
+
+## config追加
+
+今回は`tokenExpired`を自前で作ったので、コンフィグに値を追加しておく
+
+`config\auth.php`
+
+```php
+    /*
+    |--------------------------------------------------------------------------
+    | reset password expires
+    |--------------------------------------------------------------------------
+    |
+    | 手動で設定
+    |
+    */
+
+    'reset_password_expires' => 60,
+```
+
+## ルートの追加
+
+`routes\api.php`
+
+```php
+//...
+use App\Http\Controllers\Auth\ResetController;
+//...
+Route::post('/reset', [ResetController::class, 'reset']);
+Route::post('/change', [ResetController::class, 'change']);
+// ...
+```
+
+## vueの作成
+
+`resources\js\pages\auth\Reset.vue`
+
+```vue
+<template>
+  <div class="container">
+    <h1>Reset</h1>
+    <Nav />
+    <Message :title="message" :contents="errors" @close="close" />
+
+    <form @submit.prevent="reset">
+      <input type="password" name="password" v-model="resetForm.password" />
+      <input
+        type="password"
+        name="password_confirmation"
+        v-model="resetForm.password_confirmation"
+      />
+      <button type="submit">reset</button>
+    </form>
+  </div>
+</template>
+
+<script>
+import Nav from "@/components/Nav.vue";
+import Message from "@/components/Message.vue";
+export default {
+  name: "Reset",
+  components: {
+    Nav,
+    Message,
+  },
+  props: {
+    token: {
+      type: String,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      resetForm: {
+        password: "$Pw111111",
+        password_confirmation: "$Pw111111",
+      },
+      message: null,
+      errors: null,
+    };
+  },
+  methods: {
+    async reset() {
+      this.resetForm.token = this.token;
+
+      const { data, status } = await axios.post("change", this.resetForm);
+      if (status === 200) {
+        this.message = data.message;
+        this.errors = null;
+      } else {
+        this.message = data.message;
+        this.errors = data.errors;
+      }
+    },
+    close() {
+      this.message = null;
+      this.errors = null;
+    },
+  },
+  async created() {
+    this.resetForm.token = this.token;
+    const { data, status } = await axios.post("reset", {
+      token: this.token,
+    });
+    if (status === 200) {
+      this.message = data.message;
+      this.errors = null;
+    } else {
+      this.message = data.message;
+      this.errors = data.errors;
+    }
+  },
+};
+</script>
+```
+
+## vueルーター
+
+```javascript
+//...
+import Reset from '@/pages/auth/Reset.vue'
+//...
+    // Verify
+    {
+        // ルートネーム
+        name: 'verify',
+        // urlのパス
+        path: '/verify/:token',
+        // インポートしたページ
+        component: Verify,
+        props: true,
+    },
+    // Reset 追加
+    {
+        // Reset
+        name: 'reset',
+        // urlのパス
+        path: '/reset/:token',
+        // インポートしたページ
+        component: Reset,
+        props: true,
+    },
+//...
+```

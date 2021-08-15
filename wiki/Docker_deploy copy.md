@@ -1,17 +1,5 @@
 # docker
 
-- dockerを使ったlaravel環境の作り方  
-- 「https-portal」を使って「Let's Encrypt」でhttps化（ローカルではなし）
-- 「laravel-mix」で必要な「node」、「npm」もインストール
-- 「CACHE_DRIVER」、「QUEUE_CONNECTION」、「SESSION_DRIVER」ように「redis」も準備
-- 画像編集用に「DG」も準備
-
-## reference
-[https-portal](https://github.com/SteveLTN/https-portal)  
-[https-portal blog](https://re-engines.com/2019/03/28/docker-https-portal/)  
-
-## conditions
-
 aws amazon linux2
 
 * php8
@@ -24,11 +12,98 @@ aws amazon linux2
 * mysql:5.7
 * Node
 
+## docker install
+
+### yum update
+
+ `$ sudo yum update -y`
+
+### yum から docker をインストール
+
+ `$ sudo yum install -y docker`
+
+### docker サービスの起動
+
+ `$ sudo systemctl start docker`
+
+ `$ sudo systemctl status docker`
+
+### 自動起動設定
+
+ `$ sudo systemctl enable docker`
+
+### 自動起動設定確認
+
+```bash
+$ sudo systemctl list-unit-files | grep docker.service
+
+    docker.service          enabled
+```
+
+### ec2-user を docker グループに追加する
+
+ `sudo usermod -a -G docker ec2-user`
+
+一度ログアウトし、再度ログインすると、 docker コマンドが利用可能になる。
+ `$ exit`
+
+ `$ docker info`
+
+## docker-comose install
+
+### 一時的にスーパーユーザーになる
+
+ `$ sudo -i`
+
+--->  ここから一時的にスーパーユーザー
+
+ `$ curl -L "https://github.com/docker/compose/releases/download/1.11.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
+
+### docker-compose コマンドに実行権限付与
+
+ `$ chmod +x /usr/local/bin/docker-compose`
+
+### スーパーユーザーを抜ける
+
+ `$ exit`
+
+<--- スーパーユーザーここまで
+
+### create directory
+
+ `$ cd /var`
+
+ `$ sudo mkdir www`
+
+ `$ cd www`
+
+### crete docker directory
+
+ `$ sudo mkdir docker`
+
+ `$ sudo mkdir docker/db`
+
+ `$ sudo mkdir docker/db/conf`
+
+ `$ sudo mkdir docker/https-portal`
+
+ `$ sudo mkdir docker/nginx`
+
+ `$ sudo mkdir docker/php`
+
+### docker-compose コマンドの実行確認
+
+```bash
+$ docker-compose --version
+    docker-compose version 1.11.2, build dfed245
+```
+
 ## docker-comose setup
 
 ### directories
 
 ```text
+
 www ─┬─ docker ┬─ db ─ conf ─ my.conf
      │         ├─ https-portal
      │         ├─ nginx ─ default.conf
@@ -38,18 +113,31 @@ www ─┬─ docker ┬─ db ─ conf ─ my.conf
      └─ docker-compose.yml
 ```
 
-### create setting files
+### db my.conf
 
-`docker/db/conf/my.conf`
+```bash
+$ sudo touch docker/db/conf/my.conf
+$ sudo vim docker/db/conf/my.conf
 
-```conf:docker/db/conf/my.conf
+  i
+  ------
+  [mysqld]
   max_allowed_packet = 16M
   default-time-zone = 'Asia/Tokyo'
+  -----
+  esk
+  :wq
+
 ```
 
-`docker/nginx/default.conf`
+### nginx default.conf
 
-```conf:docker/nginx/default.conf
+```bash
+$ sudo touch docker/nginx/default.conf
+$ sudo vim docker/nginx/default.conf
+```
+
+```conf
 server {
   listen 80;
     index index.php index.html;
@@ -73,9 +161,14 @@ server {
 }
 ```
 
-`docker/php/php.ini`
+### php.ini
 
-```ini:docker/php/php.ini
+```bash
+$ sudo touch docker/php/php.ini
+$ sudo vim docker/php/php.ini
+```
+
+```ini
 [Date]
 date.timezone = "Asia/Tokyo"
 [mbstring]
@@ -89,9 +182,14 @@ xdebug.remote_port=9000
 xdebug.remote_log=/tmp/xdebug.log
 ```
 
-`docker/php/Dockerfile`
+### Dockerfile
 
-```Dockerfile:docker/php/Dockerfile
+```bash
+$ sudo touch docker/php/Dockerfile
+$ sudo vim docker/php/Dockerfile
+```
+
+```Dockerfile
 FROM php:8.0-fpm
 
 COPY php.ini /usr/local/etc/php/
@@ -148,9 +246,14 @@ WORKDIR /var/www
 RUN composer global require "laravel/installer"
 ```
 
-`docker-compose.yml`
+### docker-compose.yml
 
-```yml:docker-compose.yml
+```bash
+$ sudo touch docker-compose.yml
+$ sudo vim docker-compose.yml
+```
+
+```yml
 # Docker Composeのバージョン
 version: "3"
 
@@ -172,7 +275,7 @@ services:
     restart: always
     environment:
       # - for prod -
-      # DOMAINS: "example.com -> http://nginx, www.example.com -> http://nginx" # <-- domain
+      # DOMAINS: "example.com -> http://nginx" # <-- dimain
       # STAGE: "production"
       # - for dev -
       DOMAINS: "localhost -> http://nginx"
@@ -251,67 +354,59 @@ services:
       - ./docker/redis/data:/data
 ```
 
-### laravel envの準備
 
-`.env`
 
-```.env
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=base64:QVRzqfg8dRym9U3B4I4PhIeDD+sOUNNyRmYis9fESgE=
-APP_DEBUG=true
-APP_URL=http://localhost
 
-LOG_CHANNEL=stack
-LOG_LEVEL=debug
 
-DB_CONNECTION=mysql
-DB_HOST=feature_db
-DB_PORT=3306
-DB_DATABASE=database
-DB_USERNAME=docker
-DB_PASSWORD=docker
 
-BROADCAST_DRIVER=log
-CACHE_DRIVER=redis
-FILESYSTEM_DRIVER=local
-QUEUE_CONNECTION=redis
-SESSION_DRIVER=redis
-SESSION_LIFETIME=120
 
-MEMCACHED_HOST=127.0.0.1
 
-REDIS_HOST=feature_redis
-REDIS_PASSWORD=null
-REDIS_PORT=6379
 
-MAIL_MAILER=
-MAIL_HOST=
-MAIL_PORT=
-MAIL_USERNAME=
-MAIL_PASSWORD=
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=info@exmple.com
-MAIL_FROM_NAME="${APP_NAME}"
 
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=
-AWS_BUCKET=
-AWS_URL=
-AWS_USE_PATH_STYLE_ENDPOINT=false
 
-PUSHER_APP_ID=
-PUSHER_APP_KEY=
-PUSHER_APP_SECRET=
-PUSHER_APP_CLUSTER=mt1
 
-MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
-MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
 
+
+### 本番用に変更
+
+```yml
+version: "3"
+
+services:
+  ## phpサービス
+  php:
+    container_name: ${NAME_PREFIX}_php
+    build: ./docker/php
+    volumes:
+      - ./src:/var/www
+    # ports:
+     # - "3000:3000" ## 閉じる
+     # - "3001:3001"
+
+#...
+
+  ## https-portalサービス
+  https-portal:
+    container_name: ${NAME_PREFIX}_https-portal
+    image: steveltn/https-portal
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    environment:
+      # - for prod -
+      DOMAINS: "www.example.com => https://example.com" # <-- dimain
+      STAGE: "production"
+      # - for dev -
+      # DOMAINS: "localhost -> http://nginx"
+      # STAGE: "local"
+      # - 証明書 -
+      FORCE_RENEW: 'false' # <-- 毎日証明書を更新
+    volumes:
+      - ./docker/https-portal:/var/lib/https-portal
+
+#...
 ```
-
-## docker start at local
 
 ### docker start
 
@@ -325,7 +420,6 @@ composer create-project "laravel/laravel=8.*" . --prefer-dist
 # laravelソースを持ってくる
 
 composer install
-composer dump-autoload
 chmod 777 -R /var/www/storage
 
 php artisan key:generate
@@ -336,5 +430,4 @@ php artisan storage:link
 
 php artisan migrate
 php artisan db:seed
-php artisan queue:work
 ```

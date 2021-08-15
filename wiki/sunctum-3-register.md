@@ -1,27 +1,10 @@
-# Register
-
-## サンプルリポジトリ
-
-[Register](https://github.com/kohx/sanctom-auth/releases/tag/v1.0.1)  
-
-### サンプルから始める場合
-
-```bash
-composer install
-npm i -g npm
-npm i
-php artisan key:generate
-php artisan config:clear
-php artisan config:cache
-npm run watch
-```
+# sanctum register
 
 ## .envの設定
 
 テスト用に「mailtrap.io」のメールの設定をする。
 
 ```.env
-
 #...
 
 MAIL_MAILER=smtp
@@ -34,16 +17,18 @@ MAIL_FROM_ADDRESS=info@example.com
 MAIL_FROM_NAME="${APP_NAME}"
 
 #...
-
 ```
 
 ## モデルとテーブルの作成
+
+register_usersテーブルの作成と、
+RegisterUserモデルの作成
 
 ```bash
 php artisan make:model RegisterUser --migration
 ```
 
-### マイグレーション
+### マイグレーション作成
 
 `database\migrations\xxxx_xx_xx_xxxxxx_create_register_users_table.php`
 
@@ -84,7 +69,7 @@ class RegisterUsersTable extends Migration
 }
 ```
 
-### モデル
+### Registerモデルの作成
 
 `app\Models\RegisterUser.php`
 
@@ -130,7 +115,9 @@ class RegisterUser extends Model
 }
 ```
 
-## コントローラ
+## Registerコントローラ
+
+基本的なメソッドは`AuthController`にあるのでエクステンドする
 
 ```bash
 php artisan make:controller Auth/RegisterController
@@ -143,26 +130,27 @@ php artisan make:controller Auth/RegisterController
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\RegisterUser;
 use App\Mail\VerificationMail;
 
-class RegisterController extends Controller
+class RegisterController extends AuthController
 {
     /**
-     * Send Register Link Email
-     * 送られてきた内容をテーブルに保存して認証メールを送信
+     * Register
      *
      * @param Request $request
-     * @return RegisterUser
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws HttpException
      */
     public function register(Request $request)
     {
+        // already logged in
+        $this->alreadyLogin($request);
+
         // validation
         $this->validateRegister($request);
 
@@ -175,42 +163,19 @@ class RegisterController extends Controller
         // send email
         $this->sendVerificationMail($registerUser);
 
-        return response()->json([
-            'message' => 'send email',
-        ], 200);
+        // success response
+        return $this->responseSuccess('sent email.');
     }
 
     /**
-     * Get a validator for an incoming registration request.
-     * バリデーション
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    protected function validateRegister(Request $request)
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-    }
-
-    /**
-     * create activation token
-     * トークンを作成する
-     * @return string
-     */
-    private function createToken()
-    {
-        return hash_hmac('sha256', Str::random(40), config('app.key'));
-    }
-
-    /**
-     * delete old data and insert data ata register user table
+     * setRegisterUser
      * 古いデータが有れば削除して新しいデータをインサート
+     *
      * @param Request $request
+     * @param string $token
+     * @return RegisterUser
      */
-    private function setRegisterUser(Request $request, $token)
+    private function setRegisterUser(Request $request, string $token)
     {
         // delete old data
         // 同じメールアドレスが残っていればテーブルから削除
@@ -224,26 +189,26 @@ class RegisterController extends Controller
         $registerUser->token = $token;
 
         // set hash password
-        $registerUser->password = Hash::make($request->password);
+        $registerUser->password = $this->passwordHash($request->password);
 
         // RegisterUser instance save
         $registerUser->save();
 
+        // registered user
         return $registerUser;
     }
 
     /**
-     * send verification mail
-     * メールクラスでメールを送信
+     * sendVerificationMail
      *
-     * @param User $registerUser
+     * @param RegisterUser $registerUser
      * @return void
      */
-    private function sendVerificationMail($registerUser)
+    private function sendVerificationMail(RegisterUser $registerUser)
     {
         Mail::to($registerUser->email)
-            ->send(new VerificationMail($registerUser->token));
-        // ->queue(new VerificationMail($registerUser->token));
+            // ->send(new VerificationMail($registerUser->token));
+            ->queue(new VerificationMail($registerUser->token));
     }
 }
 ```
@@ -296,11 +261,7 @@ class VerificationMail extends Mailable
         // 件名
         $subject = 'Verification mail';
 
-        // コールバックURLをルート名で取得
-        //TODO: これだとホットリロードでホストがおかしくなる
-        // $url = route('verification', ['token' => $this->token]);
-
-        // .envの「APP_URL」に設定したurlを取得
+        // VueへのコールバックURLをルート名で取得
         $baseUrl = config('app.url');
         $token = $this->token;
         $url = "{$baseUrl}/{$this->verifyRoute}/{$token}";
@@ -337,7 +298,7 @@ class VerificationMail extends Mailable
 </html>
 ```
 
-### VerificationMailのブレード
+### verificationメール用のブレード
 
 `resources\views\mails\verification_mail.blade.php`
 
@@ -360,54 +321,24 @@ class VerificationMail extends Mailable
 `routes\api.php`
 
 ```php
-
 //...
-
 use App\Http\Controllers\Auth\RegisterController;
-
 //...
-
 Route::post('/register', [RegisterController::class, 'register']);
-
 // ...
-
 ```
 
-## vue
+## vueの作成
 
-### resources\js\pages\front\Home.vue
-
-```vue
-<template>
-  <div class="container">
-    <h1>Home</h1>
-    <router-link :to="{ name: 'login'}">Login</router-link>
-    <router-link :to="{ name: 'register'}">Register</router-link> <!-- 追加 -->
-    <router-link :to="{ name: 'test'}">Test</router-link>
-  </div>
-</template>
-```
-
-### resources\js\pages\front\Login.vue
-
-```vue
-
-<!-- ... -->
-
-    <router-link :to="{ name: 'register'}">Register</router-link>
-
-<!-- ... -->
-
-```
-
-### resources\js\pages\auth\Register.vue
+`resources\js\pages\auth\Register.vue`
 
 ```vue
 <template>
   <div class="container">
     <h1>Register</h1>
-    <router-link :to="{ name: 'home'}">Home</router-link>
-    <router-link :to="{ name: 'login'}">Login</router-link>
+    <Nav />
+    <Message :title="message" :contents="errors" @close="close" />
+
     <form @submit.prevent="register">
       <input
         type="name"
@@ -439,52 +370,68 @@ Route::post('/register', [RegisterController::class, 'register']);
 </template>
 
 <script>
+import Nav from "@/components/Nav.vue";
+import Message from "@/components/Message.vue";
 export default {
   name: "Register",
+  components: {
+    Nav,
+    Message,
+  },
   data() {
     return {
       registerForm: {
-        name: "user0",
-        email: "user0@example.com",
-        password: "11111111",
-        password_confirmation: "11111111",
+        name: "asdf",
+        email: "asdf@example.com",
+        password: "Aa@111111",
+        password_confirmation: "Aa@111111",
       },
+      message: null,
+      errors: null,
     };
   },
   methods: {
     async register() {
       const { data, status } = await axios.post("register", this.registerForm);
       if (status === 200) {
-        alert(data.message);
+        this.message = data.message;
+        this.errors = null;
+      } else {
+        this.message = data.message;
+        this.errors = data.errors;
       }
+    },
+    close() {
+      this.message = null;
+      this.errors = null;
     },
   },
 };
 </script>
 ```
 
-### resources\js\router.js
+## vueルーター
 
 ```javascript
-
 //...
-
 import Register from '@/pages/auth/Register.vue'
-
 //...
-
-    // register
+    // Login
     {
-        path: '/register',
+        // ルートネーム
+        name: 'login',
+        // urlのパス
+        path: '/login',
+        // インポートしたページ
+        component: Login,
+    },
+    // Register 追加
+    {
         name: 'register',
-        meta: {
-            icon: 'user-plus'
-        },
+        path: '/register',
         component: Register,
     },
-
 //...
-
 ```
 
 ## queueを使用する場合

@@ -52,7 +52,7 @@ final class LoginController extends AuthController
             $this->clearLoginAttempts($request);
 
             // success login response
-            return $this->responseSuccess('Logged in.', [
+            return $this->responseSuccess(trans('Logged in.'), [
                 'user' => $request->user()
             ]);
         }
@@ -61,8 +61,8 @@ final class LoginController extends AuthController
         $this->incrementLoginAttempts($request);
 
         // fail login response
-        return $this->responseInvalid('invalid data.', [
-            $this->username() => ['auth.failed']
+        return $this->responseInvalid(trans('Invalid data.'), [
+            $this->username() => [trans('auth.failed')],
         ]);
     }
 
@@ -84,6 +84,6 @@ final class LoginController extends AuthController
         $request->session()->regenerateToken();
 
         // success login response
-        return $this->responseSuccess('Logged out.');
+        return $this->responseSuccess(trans('Logged out.'));
     }
 }

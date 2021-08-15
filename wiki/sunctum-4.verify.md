@@ -1,3 +1,16 @@
+# sanctum verify
+
+## Verifyコントローラ
+
+基本的なメソッドは`AuthController`にあるのでエクステンドする
+
+```bash
+php artisan make:controller Auth/VerifyController
+```
+
+`app\Http\Controllers\Auth\VerifyController.php`
+
+```php
 <?php
 
 namespace App\Http\Controllers\Auth;
@@ -28,7 +41,7 @@ class VerifyController extends AuthController
         // 取得できなかった場合
         if (!$registerUser) {
 
-            return $this->responseFailed(trans('Register not found.'));
+            return $this->responseFailed('register not found.');
         }
 
         // 仮登録のデータでユーザを作成
@@ -85,3 +98,97 @@ class VerifyController extends AuthController
         return $user;
     }
 }
+```
+
+## ルートの追加
+
+`routes\api.php`
+
+```php
+//...
+use App\Http\Controllers\Auth\VerifyController;
+//...
+Route::post('/verify', [VerifyController::class, 'verify']);
+// ...
+```
+
+## vueの作成
+
+`resources\js\pages\auth\Verify.vue`
+
+```vue
+<template>
+  <div class="container">
+    <h1>Verify</h1>
+    <Nav />
+    <Message :title="message" :contents="errors" @close="close" />
+  </div>
+</template>
+
+<script>
+import Nav from "@/components/Nav.vue";
+import Message from "@/components/Message.vue";
+export default {
+  name: "Verify",
+  components: {
+    Nav,
+    Message,
+  },
+  props: {
+    token: {
+      type: String,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      message: null,
+      errors: null,
+    };
+  },
+  methods: {
+    close() {
+      this.message = null;
+      this.errors = null;
+    },
+  },
+  async created() {
+    const { data, status } = await axios.post("verify", {
+      token: this.token,
+    });
+    if (status === 200) {
+      this.message = data.message;
+      this.errors = null;
+    } else {
+      this.message = data.message;
+      this.errors = data.errors;
+    }
+  },
+};
+</script>
+```
+
+## vueルーター
+
+```javascript
+//...
+import Register from '@/pages/auth/Verify.vue'
+//...
+    // Register
+    {
+        name: 'register',
+        path: '/register',
+        component: Register,
+    },
+    // Verify 追加
+    {
+        // ルートネーム
+        name: 'verify',
+        // urlのパス
+        path: '/verify/:token',
+        // インポートしたページ
+        component: Verify,
+        props: true,
+    },
+//...
+```
