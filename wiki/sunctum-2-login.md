@@ -375,7 +375,7 @@ final class LoginController extends AuthController
 
         // fail login response
         return $this->responseInvalid('invalid data.', [
-            $this->username() => ['auth.failed']
+            $this->username() => [trans('auth.failed')],
         ]);
     }
 

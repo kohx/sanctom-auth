@@ -1,0 +1,20 @@
+[
+    {
+        "type": "Directory",
+        "name": "d:\\myプロジェクト\\sanctom-auth\\src\\public",
+        "parent_id": null,
+        "fsPath": "d:\\myプロジェクト\\sanctom-auth\\src\\public",
+        "workspaceRoot": null,
+        "workspacePath": null,
+        "id": "g9Lvs4t5KnoewT7Y"
+    },
+    {
+        "type": "Directory",
+        "name": "d:\\myプロジェクト\\sanctom-auth\\src\\storage",
+        "parent_id": null,
+        "fsPath": "d:\\myプロジェクト\\sanctom-auth\\src\\storage",
+        "workspaceRoot": null,
+        "workspacePath": null,
+        "id": "wLP3HyKmRETW4Irf"
+    }
+]
