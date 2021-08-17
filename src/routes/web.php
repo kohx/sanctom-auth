@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CheckController;
 
 // Route::group(['middleware' => ['can:superAdmin']], function () {
-//     Route::get('/check', [CheckController::class, 'index'])->name('post.index');
+    Route::get('/check', [CheckController::class, 'index'])->name('post.index');
 // });
 
 // Route::get('/check/{post}', [CheckController::class, 'show'])->name('post.show');

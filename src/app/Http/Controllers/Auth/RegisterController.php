@@ -36,7 +36,7 @@ class RegisterController extends AuthController
         $this->sendVerificationMail($registerUser);
 
         // success response
-        return $this->responseSuccess('sent email.');
+        return $this->responseSuccess(trans('Sent email.'));
     }
 
     /**

@@ -28,7 +28,7 @@ class VerifyController extends AuthController
         // 取得できなかった場合
         if (!$registerUser) {
 
-            return $this->responseFailed('register not found.');
+            return $this->responseFailed(trans('Register not found.'));
         }
 
         // 仮登録のデータでユーザを作成

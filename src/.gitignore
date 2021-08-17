@@ -1,6 +1,10 @@
 node_modules
 public/hot
+
+# symbolic
 public/storage
+public/images
+
 public/js
 storage/*.key
 vendor

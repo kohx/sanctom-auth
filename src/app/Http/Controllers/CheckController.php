@@ -3,27 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Http\File;
 use App\Models\Post;
 
 class CheckController extends Controller
 {
     public function index(Request $request)
     {
-        dump(Post::all()->toArray());
-    }
+        $public = Storage::disk('public');
 
-    public function show(Request $request, Post $post)
-    {
-        dump($post->toArray());
-    }
-
-    public function store(Request $request, Post $post)
-    {
-        dump($post->toArray());
-    }
-
-    public function destroy(Request $request, Post $post)
-    {
-        dump($post->toArray());
+        $url = $public->url('asdf.txt');
+        dump($url); // http://localhost:3000/storage/asdf.txt
     }
 }

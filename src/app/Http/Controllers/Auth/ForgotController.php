@@ -36,7 +36,7 @@ class ForgotController extends AuthController
         $this->sendPasswordResetMail($passwordReset);
 
         // success response
-        return $this->responseSuccess('sent email.');
+        return $this->responseSuccess(trans('sent email.'));
     }
 
     /**

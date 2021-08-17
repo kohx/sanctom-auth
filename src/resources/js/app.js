@@ -11,7 +11,6 @@ import App from "./App.vue"
 // ルーターをインポート
 import router from "./router"
 
-
 const funcApp = async () => {
 
     return createApp(App)

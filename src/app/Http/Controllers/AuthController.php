@@ -107,11 +107,11 @@ abstract class AuthController extends Controller
     protected function alreadyLogin(Request $request, string $message = null)
     {
         // set message
-        $message = is_null($message) ? 'Already logged in.' : $message;
+        $message = is_null($message) ? trans('Already logged in.') : $message;
 
         // already logged in
         if (auth()->check()) {
-            throw new HttpException(403, trans($message));
+            throw new HttpException(403, $message);
         }
     }
 
@@ -181,7 +181,7 @@ abstract class AuthController extends Controller
      */
     protected function responseSuccess(string $message, array $additions = [])
     {
-        return response()->json(array_merge(['message' => trans($message)], $additions), 200);
+        return response()->json(array_merge(['message' => $message], $additions), 200);
     }
 
     /**
@@ -194,7 +194,7 @@ abstract class AuthController extends Controller
      */
     protected function responseFailed(string $message)
     {
-        return response()->json(['message' => trans($message)], 403);
+        return response()->json(['message' => $message], 403);
     }
 
     /**
@@ -207,14 +207,8 @@ abstract class AuthController extends Controller
      */
     protected function responseInvalid(string $message, array $errors = [])
     {
-        foreach ($errors as &$error) {
-            foreach ($error as &$value) {
-                $value = trans($value);
-            }
-        }
-
         return response()->json([
-            'message' => trans($message),
+            'message' => $message,
             'errors' => $errors,
         ], 422);
     }

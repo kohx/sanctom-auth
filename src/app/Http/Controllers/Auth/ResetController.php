@@ -30,7 +30,7 @@ class ResetController extends AuthController
         $passwordReset = $this->getPasswordReset($request->token);
         if (!$passwordReset) {
 
-            return $this->responseFailed('reset request not found.');
+            return $this->responseFailed(trans('Reset request not found.'));
         }
 
         // config\auth.phpで設定した値を取得、ない場合はもとの値
@@ -39,11 +39,11 @@ class ResetController extends AuthController
         // トークン期限切れチェック
         if ($this->tokenExpired($this->expires, $passwordReset->created_at)) {
 
-            return $this->responseFailed('token expired.');
+            return $this->responseFailed(trans('Token expired.'));
         }
 
         // success response
-        return $this->responseSuccess('in reset password');
+        return $this->responseSuccess(trans('Please change password.'));
     }
 
     /**
@@ -63,13 +63,13 @@ class ResetController extends AuthController
         $passwordReset = $this->getPasswordReset($request->token);
         if (!$passwordReset) {
 
-            return $this->responseFailed('reset request not found.');
+            return $this->responseFailed(trans('Reset request not found.'));
         }
 
         // トークン期限切れチェック
         if ($this->checkTokenExpired($passwordReset)) {
 
-            return $this->responseFailed('token expired.');
+            return $this->responseFailed(trans('Token expired.'));
         }
 
         // validate
@@ -82,7 +82,7 @@ class ResetController extends AuthController
         // auth()->loginUsingId($user->id, true);
 
         // success login response
-        return $this->responseSuccess('password changed.', [
+        return $this->responseSuccess(trans('Password changed.'), [
             // 'user' => $request->user()
         ]);
     }
